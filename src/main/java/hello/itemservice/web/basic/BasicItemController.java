@@ -3,13 +3,16 @@ package hello.itemservice.web.basic;
 import hello.itemservice.domain.item.Item;
 import hello.itemservice.domain.item.ItemRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Controller
 @RequestMapping("/basic/items")
@@ -43,25 +46,34 @@ public class BasicItemController {
                             @RequestParam Integer quantity,
                             Model model) {
 
+
+
+
         Item item = new Item();
-        item.setItemName(itemName);
-        item.setPrice(price);
-        item.setQuantity(quantity);
 
-        itemRepository.save(item);
+        try{
 
-        model.addAttribute("item", item);
+            item.setItemName(itemName);
+            item.setPrice(price);
+            item.setQuantity(quantity);
+            itemRepository.save(item);
+            model.addAttribute("item", item);
 
-        return "basic/item";        //상품목록으로
+            return "basic/item";
+        }catch (NoSuchElementException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Item Not Found");
+        }
     }
 
     //    @PostMapping("/add")
     public String addItemV2(@ModelAttribute("item") Item item, Model model) {   //@RequestParam 값을 받고, set 값을 넣고 -> @ModelAttribute 얘가 다함
                                                                                                 
+
         itemRepository.save(item);
 //      model.addAttribute("item", item); //자동 추가, 생략 가능  + @ModelAttribute 기능에 포함됨
 
         return "basic/item";
+
     }
 
     //    @PostMapping("/add")
